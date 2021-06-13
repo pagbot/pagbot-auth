@@ -10,3 +10,8 @@ APP = {
     'HOST': config('HOST', default='0.0.0.0'),
     'PORT': config('PORT', cast=int, default='8080')
 }
+
+GOOGLE_API = {
+    'CLIENT_ID': config('GOOGLE_CLIENT_ID'),
+    'CLIENT_SECRET': config('GOOGLE_CLIENT_SECRET')
+}
