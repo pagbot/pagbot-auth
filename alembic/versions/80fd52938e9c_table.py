@@ -23,7 +23,7 @@ def upgrade():
             'id', postgresql.UUID(), autoincrement=False, nullable=False
         ),
         sa.Column(
-            'user_email', sa.VARCHAR(length=255),
+            'email', sa.VARCHAR(length=255),
             autoincrement=False, nullable=True
         ),
         sa.Column('token', sa.VARCHAR(), autoincrement=False, nullable=True),

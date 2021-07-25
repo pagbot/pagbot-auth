@@ -1,9 +1,9 @@
 from src.infra.db.setup import Session
 
 
-def connect_db():
+def get_db():
     db = Session()
     try:
-        return db
+        yield db
     finally:
         db.close()

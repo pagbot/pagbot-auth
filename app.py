@@ -8,8 +8,9 @@ from src.infra.db.setup import init_db
 
 app = FastAPI()
 
-init_routes(app)
 init_db()
+init_routes(app)
+
 
 if __name__ == "__main__":
     run('app:app', host=APP['HOST'], port=APP['PORT'], reload=True)

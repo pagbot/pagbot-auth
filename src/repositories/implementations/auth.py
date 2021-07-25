@@ -5,13 +5,13 @@ from googleapiclient.discovery import build
 from fastapi.responses import JSONResponse
 
 from src.repositories.interfaces.auth import IAuth
-from src.infra.db.connection import connect_db
 from src.entities.auth import Auth as AuthTable
 from src.settings import GOOGLE_API
 
 
 class Auth(IAuth):
-    db = connect_db()
+    def __init__(self, db):
+        self.db = db
 
     @staticmethod
     def start_config():
@@ -32,11 +32,13 @@ class Auth(IAuth):
         auth = AuthTable(**data)
         self.db.add(auth)
         self.db.commit()
+        self.db.refresh(auth)
+        return auth
 
-    async def has_user(self, user_email):
+    async def has_user(self, email):
         return bool(self.db.query(
             AuthTable
-        ).filter_by(user_email=user_email).first())
+        ).filter_by(email=email).first())
 
     @staticmethod
     async def watch_user(gmail):
@@ -58,26 +60,25 @@ class Auth(IAuth):
         json_creds = json.loads(creds.to_json())
         json_creds.pop('token_uri')
         json_creds.pop('scopes')
-        json_creds['user_email'] = user_email["emailAddress"]
+        json_creds['email'] = user_email["emailAddress"]
 
-        user = await self.has_user(json_creds['user_email'])
+        user = await self.has_user(json_creds['email'])
         if not user:
             await self.watch_user(gmail)
-            await self.create_auth(json_creds)
-            return JSONResponse({
+            new_user = await self.create_auth(json_creds)
+            return {
                 'data': [{
-                    'userEmail': json_creds['user_email'],
-                    'authToken': json_creds['token']
+                    'id': str(new_user.id),
+                    'email': json_creds['email'],
+                    'token': json_creds['token']
                 }],
                 "errors": [],
-                "status": 200,
                 "message": "Success"
-            })
+            }
         return JSONResponse(
             content={
                 'data': [],
                 "errors": [{'message': 'User already exists'}],
-                "status": 400,
                 "message": "Database Error"
             },
             status_code=400

@@ -1,5 +1,5 @@
 make revision:
-	@alembic revision --autogenerate -m "table"
+	alembic revision --autogenerate -m "table"
 
 make upgrade:
-	@alembic upgrade head
+	alembic upgrade head
